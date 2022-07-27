@@ -14,7 +14,7 @@ class GamePage extends StatefulWidget {
 
 class _GamePageState extends State<GamePage> {
   List<Offset> positions = [];
-  int length = 5;
+  int length = 5; // initial length of the snake
   int step = 20;
   Direction direction = Direction.right;
 
@@ -31,7 +31,20 @@ class _GamePageState extends State<GamePage> {
   int score = 0;
 
   void draw() async {
-    // TODO
+    // Step 1
+    if (positions.length == 0) {
+      positions.add(getRandomPositionWithinRange());
+    }
+    // Step 2
+    while (length > positions.length) {
+      positions.add(positions[positions.length - 1]);
+    }
+    // Step 3
+    for (var i = positions.length - 1; i > 0; i--) {
+      positions[i] = positions[i - 1];
+    }
+
+    positions[0] = await getNextPosition(positions[0]);
   }
 
   Direction getRandomDirection([DirectionType type]) {
@@ -58,7 +71,8 @@ class _GamePageState extends State<GamePage> {
   Offset getRandomPositionWithinRange() {
     int posX = Random().nextInt(upperBoundX) + lowerBoundX;
     int posY = Random().nextInt(upperBoundY) + lowerBoundY;
-    return Offset(roundToNearestTens(posX).toDouble(), roundToNearestTens(posY).toDouble());
+    return Offset(roundToNearestTens(posX).toDouble(),
+        roundToNearestTens(posY).toDouble());
   }
 
   bool detectCollision(Offset position) {
@@ -83,7 +97,9 @@ class _GamePageState extends State<GamePage> {
             style: TextStyle(color: Colors.white),
           ),
           content: Text(
-            "Your game is over but you played well. Your score is " + score.toString() + ".",
+            "Your game is over but you played well. Your score is " +
+                score.toString() +
+                ".",
             style: TextStyle(color: Colors.white),
           ),
           actions: [
@@ -94,7 +110,8 @@ class _GamePageState extends State<GamePage> {
               },
               child: Text(
                 "Restart",
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -104,7 +121,18 @@ class _GamePageState extends State<GamePage> {
   }
 
   Future<Offset> getNextPosition(Offset position) async {
-    // TODO
+    Offset nextPosition;
+    if (direction == Direction.right) {
+      nextPosition = Offset(position.dx + step, position.dy);
+    } else if (direction == Direction.left) {
+      nextPosition = Offset(position.dx - step, position.dy);
+    } else if (direction == Direction.up) {
+      nextPosition = Offset(position.dx, position.dy - step);
+    } else if (direction == Direction.down) {
+      nextPosition = Offset(position.dx, position.dy + step);
+    }
+
+    return nextPosition;
   }
 
   void drawFood() {
@@ -112,7 +140,30 @@ class _GamePageState extends State<GamePage> {
   }
 
   List<Piece> getPieces() {
-    // TODO
+    final pieces = <Piece>[];
+    draw();
+    drawFood();
+
+    // 1
+    for (var i = 0; i < length; ++i) {
+      // 2
+      if (i >= positions.length) {
+        continue;
+      }
+
+      // 3
+      pieces.add(
+        Piece(
+          posX: positions[i].dx.toInt(),
+          posY: positions[i].dy.toInt(),
+          // 4
+          size: step,
+          color: Colors.red,
+        ),
+      );
+    }
+
+    return pieces;
   }
 
   Widget getControls() {
@@ -179,7 +230,11 @@ class _GamePageState extends State<GamePage> {
       body: Container(
         color: Color(0XFFF5BB00),
         child: Stack(
-          children: [],
+          children: [
+            Stack(
+              children: getPieces(),
+            )
+          ],
         ),
       ),
     );
