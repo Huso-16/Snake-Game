@@ -182,7 +182,7 @@ class _GamePageState extends State<GamePage> {
   void changeSpeed() {
     if (timer != null && timer.isActive) timer.cancel();
 
-    timer = Timer.periodic(Duration(microseconds: 200 ~/ speed), (timer) {
+    timer = Timer.periodic(Duration(milliseconds: 200 ~/ speed), (timer) {
       setState(() {});
     });
   }
