@@ -7,7 +7,6 @@ import 'package:flutter_snake_game/direction.dart';
 import 'package:flutter_snake_game/direction_type.dart';
 import 'package:flutter_snake_game/piece.dart';
 
-
 class GamePage extends StatefulWidget {
   @override
   _GamePageState createState() => _GamePageState();
@@ -137,7 +136,28 @@ class _GamePageState extends State<GamePage> {
   }
 
   void drawFood() {
-    // TODO
+    // Step 1
+    if (foodPosition == null) {
+      foodPosition = getRandomPositionWithinRange();
+    }
+
+    if(foodPosition == positions[0]){
+      length++;
+      speed += 0.05;
+      score += 5;
+      changeSpeed();
+
+      foodPosition = getRandomPositionWithinRange();
+    }
+
+    // Step 2
+    food = Piece(
+      posX: foodPosition.dx.toInt(),
+      posY: foodPosition.dy.toInt(),
+      size: step,
+      color: Color(0XFF8EA604),
+      isAnimated: true,
+    );
   }
 
   List<Piece> getPieces() {
@@ -168,9 +188,11 @@ class _GamePageState extends State<GamePage> {
   }
 
   Widget getControls() {
-    return ControlPanel(onTapped: (Direction newDirection){
-      direction = newDirection;
-    },);
+    return ControlPanel(
+      onTapped: (Direction newDirection) {
+        direction = newDirection;
+      },
+    );
   }
 
   int roundToNearestTens(int num) {
@@ -242,6 +264,7 @@ class _GamePageState extends State<GamePage> {
               children: getPieces(),
             ),
             getControls(),
+            food
           ],
         ),
       ),
