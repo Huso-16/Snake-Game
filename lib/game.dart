@@ -180,7 +180,11 @@ class _GamePageState extends State<GamePage> {
   }
 
   void changeSpeed() {
-    // TODO
+    if (timer != null && timer.isActive) timer.cancel();
+
+    timer = Timer.periodic(Duration(microseconds: 200 ~/ speed), (timer) {
+      setState(() {});
+    });
   }
 
   Widget getScore() {
@@ -188,7 +192,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void restart() {
-    // TODO
+    changeSpeed();
   }
 
   Widget getPlayAreaBorder() {
