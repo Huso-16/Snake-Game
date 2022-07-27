@@ -76,7 +76,15 @@ class _GamePageState extends State<GamePage> {
   }
 
   bool detectCollision(Offset position) {
-    // TODO
+    if (position.dx >= upperBoundX && direction == Direction.right)
+      return true;
+    else if (position.dx <= lowerBoundX && direction == Direction.left)
+      return true;
+    else if (position.dy >= upperBoundY && direction == Direction.down)
+      return true;
+    else if (position.dy <= lowerBoundY && direction == Direction.up)
+      return true;
+    return false;
   }
 
   void showGameOverDialog() {
@@ -132,6 +140,13 @@ class _GamePageState extends State<GamePage> {
       nextPosition = Offset(position.dx, position.dy + step);
     }
 
+    if (detectCollision(position)) {
+      if (timer != null && timer.isActive) timer.cancel();
+      await Future.delayed(
+          Duration(milliseconds: 500), () => showGameOverDialog());
+      return position;
+    }
+
     return nextPosition;
   }
 
@@ -141,7 +156,7 @@ class _GamePageState extends State<GamePage> {
       foodPosition = getRandomPositionWithinRange();
     }
 
-    if(foodPosition == positions[0]){
+    if (foodPosition == positions[0]) {
       length++;
       speed += 0.05;
       score += 5;
@@ -260,6 +275,7 @@ class _GamePageState extends State<GamePage> {
         color: Color(0XFFF5BB00),
         child: Stack(
           children: [
+            getPlayAreaBorder(),
             Stack(
               children: getPieces(),
             ),
