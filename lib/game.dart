@@ -228,7 +228,14 @@ class _GamePageState extends State<GamePage> {
   }
 
   Widget getScore() {
-    // TODO
+    return Positioned(
+      top: 50.0,
+      right: 40.0,
+      child: Text(
+        "Score: " + score.toString(),
+        style: TextStyle(fontSize: 24.0),
+      ),
+    );
   }
 
   void restart() {
@@ -284,7 +291,8 @@ class _GamePageState extends State<GamePage> {
               children: getPieces(),
             ),
             getControls(),
-            food
+            food,
+            getScore()
           ],
         ),
       ),
