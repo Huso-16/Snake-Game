@@ -2,10 +2,11 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_snake_game/control_panel.dart';
+import 'package:flutter_snake_game/direction.dart';
 import 'package:flutter_snake_game/direction_type.dart';
+import 'package:flutter_snake_game/piece.dart';
 
-import 'direction.dart';
-import 'piece.dart';
 
 class GamePage extends StatefulWidget {
   @override
@@ -167,7 +168,9 @@ class _GamePageState extends State<GamePage> {
   }
 
   Widget getControls() {
-    // TODO
+    return ControlPanel(onTapped: (Direction newDirection){
+      direction = newDirection;
+    },);
   }
 
   int roundToNearestTens(int num) {
@@ -237,7 +240,8 @@ class _GamePageState extends State<GamePage> {
           children: [
             Stack(
               children: getPieces(),
-            )
+            ),
+            getControls(),
           ],
         ),
       ),
