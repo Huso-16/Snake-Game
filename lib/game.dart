@@ -232,6 +232,11 @@ class _GamePageState extends State<GamePage> {
   }
 
   void restart() {
+    score = 0;
+    length = 5;
+    positions.clear();
+    direction = getRandomDirection();
+    speed = 1;
     changeSpeed();
   }
 
@@ -256,7 +261,6 @@ class _GamePageState extends State<GamePage> {
   @override
   void initState() {
     super.initState();
-
     restart();
   }
 
