@@ -17,6 +17,7 @@ class _GamePageState extends State<GamePage> {
   int length = 5; // initial length of the snake
   int step = 20;
   Direction direction = Direction.right;
+  Direction _previousDirection;
 
   Piece food;
   Offset foodPosition;
@@ -131,13 +132,33 @@ class _GamePageState extends State<GamePage> {
   Future<Offset> getNextPosition(Offset position) async {
     Offset nextPosition;
     if (direction == Direction.right) {
-      nextPosition = Offset(position.dx + step, position.dy);
+      if (_previousDirection == Direction.left) {
+        nextPosition = Offset(position.dx - step, position.dy);
+      } else {
+        _previousDirection = direction;
+        nextPosition = Offset(position.dx + step, position.dy);
+      }
     } else if (direction == Direction.left) {
-      nextPosition = Offset(position.dx - step, position.dy);
+      if (_previousDirection == Direction.right)
+        nextPosition = Offset(position.dx + step, position.dy);
+      else {
+        _previousDirection = direction;
+        nextPosition = Offset(position.dx - step, position.dy);
+      }
     } else if (direction == Direction.up) {
-      nextPosition = Offset(position.dx, position.dy - step);
+      if (_previousDirection == Direction.down) {
+        nextPosition = Offset(position.dx, position.dy + step);
+      } else {
+        _previousDirection = direction;
+        nextPosition = Offset(position.dx, position.dy - step);
+      }
     } else if (direction == Direction.down) {
-      nextPosition = Offset(position.dx, position.dy + step);
+      if (_previousDirection == Direction.up) {
+        nextPosition = Offset(position.dx, position.dy - step);
+      } else {
+        _previousDirection = direction;
+        nextPosition = Offset(position.dx, position.dy + step);
+      }
     }
 
     if (detectCollision(position)) {
@@ -268,6 +289,7 @@ class _GamePageState extends State<GamePage> {
   @override
   void initState() {
     super.initState();
+    _previousDirection = direction;
     restart();
   }
 
