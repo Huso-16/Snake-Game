@@ -2,6 +2,18 @@
 
 A new Flutter application.
 
+# How to set up
+
+<ol>
+  <li>Fork this repo and clone to your local machine</li>
+  <li>Open cloned folder in Android Studio project</li>
+  <li>Run the `flutter create .` command in the project folder to generate the platform folders.</li>
+  <li>Run the `flutter pub get` to download dependencies, or simply double-click `pubspec.yaml` on the left-side panel, then clicking pub get at the top of your screen.</li>
+  <li>Run `flutter run`, ensure device is connected.</li>
+</ol>
+
+#### And that should be it!...
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.
