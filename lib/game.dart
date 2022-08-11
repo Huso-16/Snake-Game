@@ -257,13 +257,9 @@ class _GamePageState extends State<GamePage> {
   }
 
   Widget getScore() {
-    return Positioned(
-      top: 50.0,
-      right: 40.0,
-      child: Text(
-        "Score: " + score.toString(),
-        style: TextStyle(fontSize: 24.0),
-      ),
+    return Text(
+      "Score: " + score.toString(),
+      style: TextStyle(fontSize: 24.0),
     );
   }
 
@@ -309,20 +305,29 @@ class _GamePageState extends State<GamePage> {
     lowerBoundX = step;
     lowerBoundY = step;
     upperBoundX = roundToNearestTens(screenWidth.toInt() - step);
-    upperBoundY = roundToNearestTens(screenHeight.toInt() - step);
+    upperBoundY = roundToNearestTens(screenWidth.toInt() - step);
 
     return Scaffold(
+      appBar: AppBar(
+        title: getScore(),
+      ),
       body: Container(
-        color: Color(0XFFF5BB00),
-        child: Stack(
+        child: Column(
           children: [
-            getPlayAreaBorder(),
-            Stack(
-              children: getPieces(),
+            Expanded(
+              child: Container(
+                child: Stack(
+                  children: [
+                    getPlayAreaBorder(),
+                    Stack(
+                      children: getPieces(),
+                    ),
+                    food,
+                  ],
+                ),
+              ),
             ),
             getControls(),
-            food,
-            getScore()
           ],
         ),
       ),
