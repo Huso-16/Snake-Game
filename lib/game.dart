@@ -294,7 +294,7 @@ class _GamePageState extends State<GamePage> {
   void initState() {
     super.initState();
     _previousDirection = direction;
-    // restart();
+    restart();
   }
 
   @override
@@ -305,14 +305,13 @@ class _GamePageState extends State<GamePage> {
     lowerBoundX = step;
     lowerBoundY = step;
     upperBoundX = roundToNearestTens(screenWidth.toInt() - step);
-    upperBoundY = roundToNearestTens(screenHeight.toInt() - step);
+    upperBoundY = roundToNearestTens(screenWidth.toInt() - step);
 
     return Scaffold(
       appBar: AppBar(
         title: getScore(),
       ),
       body: Container(
-        color: Color(0XFFF5BB00),
         child: Column(
           children: [
             Expanded(
