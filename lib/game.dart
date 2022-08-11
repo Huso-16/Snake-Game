@@ -85,6 +85,14 @@ class _GamePageState extends State<GamePage> {
       return true;
     else if (position.dy <= lowerBoundY && direction == Direction.up)
       return true;
+
+    // game ends if the snake collides with itself
+    if (positions.length > 5) {
+      for (int i = 3; i < positions.length; i++) {
+        if (positions[i] == position) return true;
+      }
+    }
+    // no collision
     return false;
   }
 
@@ -243,7 +251,7 @@ class _GamePageState extends State<GamePage> {
   void changeSpeed() {
     if (timer != null && timer.isActive) timer.cancel();
 
-    timer = Timer.periodic(Duration(milliseconds: 200 ~/ speed), (timer) {
+    timer = Timer.periodic(Duration(milliseconds: 250 ~/ speed), (timer) {
       setState(() {});
     });
   }
