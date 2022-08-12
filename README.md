@@ -9,6 +9,7 @@ A new Flutter application.
   <li>Open cloned folder in Android Studio project</li>
   <li>Run the `flutter create .` command in the project folder to generate the platform folders.</li>
   <li>Run the `flutter pub get` to download dependencies, or simply double-click `pubspec.yaml` on the left-side panel, then clicking pub get at the top of your screen.</li>
+  <li>Run `flutter pub run flutter_launcher_icons:main`, to override default app icon(currently for `android`)</li>
   <li>Run `flutter run`, ensure device is connected.</li>
 </ol>
 
