@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ControlButton extends StatelessWidget {
-  final Function onPressed;
+  final Function() onPressed;
   final Icon icon;
 
-  const ControlButton({Key key, this.onPressed, this.icon}) : super(key: key);
+  const ControlButton({required this.onPressed, required this.icon});
 
   @override
   Widget build(BuildContext context) {

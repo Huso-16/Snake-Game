@@ -39,3 +39,12 @@ app.*.symbols
 
 # Obfuscation related
 app.*.map.json
+
+# remmove all directory
+android/
+ios/
+macos/
+linux/
+windows/
+web/
+test/

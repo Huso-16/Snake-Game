@@ -6,7 +6,7 @@ import 'direction.dart';
 class ControlPanel extends StatelessWidget {
   final void Function(Direction direction) onTapped;
 
-  const ControlPanel({Key key, this.onTapped}) : super(key: key);
+  const ControlPanel({super.key, required this.onTapped});
 
   @override
   Widget build(BuildContext context) {
