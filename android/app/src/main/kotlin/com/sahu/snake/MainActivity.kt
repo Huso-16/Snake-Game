@@ -1,4 +1,4 @@
-package com.sahu.snake.snake_game
+package com.sahu.snake
 
 import io.flutter.embedding.android.FlutterActivity
 
