@@ -6,14 +6,21 @@ class Piece extends StatefulWidget {
   final Color color;
   final bool isAnimated;
 
-  const Piece({Key key, this.posX, this.posY, this.size, this.color = const Color(0XFFBF3100), this.isAnimated = false}) : super(key: key);
+  const Piece({
+    Key? key,
+    required this.posX,
+    required this.posY,
+    required this.size,
+    this.color = const Color(0XFFBF3100),
+    this.isAnimated = false,
+  }) : super(key: key);
 
   @override
   _PieceState createState() => _PieceState();
 }
 
 class _PieceState extends State<Piece> with SingleTickerProviderStateMixin {
-  AnimationController _animationController;
+  AnimationController? _animationController;
 
   @override
   void initState() {
@@ -24,20 +31,20 @@ class _PieceState extends State<Piece> with SingleTickerProviderStateMixin {
       duration: Duration(milliseconds: 1000),
       vsync: this,
     );
-    _animationController.addStatusListener((status) {
+    _animationController?.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        _animationController.reset();
+        _animationController?.reset();
       } else if (status == AnimationStatus.dismissed) {
-        _animationController.forward();
+        _animationController?.forward();
       }
     });
 
-    _animationController.forward();
+    _animationController?.forward();
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _animationController?.dispose();
     super.dispose();
   }
 
@@ -47,7 +54,7 @@ class _PieceState extends State<Piece> with SingleTickerProviderStateMixin {
       left: widget.posX.toDouble(),
       top: widget.posY.toDouble(),
       child: Opacity(
-        opacity: widget.isAnimated ? _animationController.value : 1.0,
+        opacity: widget.isAnimated ? _animationController?.value ?? 1.0 : 1.0,
         child: Container(
           width: widget.size.toDouble(),
           height: widget.size.toDouble(),

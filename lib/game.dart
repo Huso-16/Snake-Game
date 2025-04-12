@@ -17,16 +17,16 @@ class _GamePageState extends State<GamePage> {
   int length = 5; // initial length of the snake
   int step = 20;
   Direction direction = Direction.right;
-  Direction _previousDirection;
+  Direction? _previousDirection;
 
-  Piece food;
-  Offset foodPosition;
+  Piece? food;
+  Offset? foodPosition;
 
-  double screenWidth;
-  double screenHeight;
-  int lowerBoundX, upperBoundX, lowerBoundY, upperBoundY;
+  double? screenWidth;
+  double? screenHeight;
+  late int lowerBoundX, upperBoundX, lowerBoundY, upperBoundY;
 
-  Timer timer;
+  Timer? timer;
   double speed = 1;
 
   int score = 0;
@@ -48,7 +48,8 @@ class _GamePageState extends State<GamePage> {
     positions[0] = await getNextPosition(positions[0]);
   }
 
-  Direction getRandomDirection([DirectionType type]) {
+  Direction getRandomDirection([DirectionType? type]) {
+    
     if (type == DirectionType.horizontal) {
       bool random = Random().nextBool();
       if (random) {
@@ -120,7 +121,7 @@ class _GamePageState extends State<GamePage> {
             style: TextStyle(color: Colors.white),
           ),
           actions: [
-            FlatButton(
+            TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
                 restart();
@@ -138,7 +139,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   Future<Offset> getNextPosition(Offset position) async {
-    Offset nextPosition;
+    Offset nextPosition = position; // Initialize with a default value
     if (direction == Direction.right) {
       if (_previousDirection == Direction.left) {
         nextPosition = Offset(position.dx - step, position.dy);
@@ -170,7 +171,7 @@ class _GamePageState extends State<GamePage> {
     }
 
     if (detectCollision(position)) {
-      if (timer != null && timer.isActive) timer.cancel();
+      if (timer != null && timer!.isActive) timer!.cancel();
       await Future.delayed(
           Duration(milliseconds: 500), () => showGameOverDialog());
       return position;
@@ -196,8 +197,8 @@ class _GamePageState extends State<GamePage> {
 
     // Step 2
     food = Piece(
-      posX: foodPosition.dx.toInt(),
-      posY: foodPosition.dy.toInt(),
+      posX: foodPosition!.dx.toInt(),
+      posY: foodPosition!.dy.toInt(),
       size: step,
       color: Color(0XFF8EA604),
       isAnimated: true,
@@ -249,7 +250,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void changeSpeed() {
-    if (timer != null && timer.isActive) timer.cancel();
+    if (timer != null && timer!.isActive) timer!.cancel();
 
     timer = Timer.periodic(Duration(milliseconds: 250 ~/ speed), (timer) {
       setState(() {});
@@ -304,8 +305,8 @@ class _GamePageState extends State<GamePage> {
 
     lowerBoundX = step;
     lowerBoundY = step;
-    upperBoundX = roundToNearestTens(screenWidth.toInt() - step);
-    upperBoundY = roundToNearestTens(screenWidth.toInt() - step);
+    upperBoundX = roundToNearestTens(screenWidth!.toInt() - step);
+    upperBoundY = roundToNearestTens(screenWidth!.toInt() - step);
 
     return Scaffold(
       appBar: AppBar(
@@ -322,7 +323,7 @@ class _GamePageState extends State<GamePage> {
                     Stack(
                       children: getPieces(),
                     ),
-                    food,
+                    if (food != null) food!,
                   ],
                 ),
               ),
