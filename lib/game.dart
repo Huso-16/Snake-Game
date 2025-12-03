@@ -1,11 +1,10 @@
-import 'dart:async';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_snake_game/control_panel.dart';
-import 'package:flutter_snake_game/direction.dart';
-import 'package:flutter_snake_game/direction_type.dart';
-import 'package:flutter_snake_game/piece.dart';
+
+import 'control_panel.dart';
+import 'control_mode.dart';
+import 'direction.dart';
+import 'game_board.dart';
+import 'snake_game.dart';
 
 class GamePage extends StatefulWidget {
   @override
@@ -13,324 +12,187 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  List<Offset> positions = [];
-  int length = 5; // initial length of the snake
-  int step = 20;
-  Direction direction = Direction.right;
-  Direction? _previousDirection;
+  static const int _cellSize = 20;
 
-  Piece? food;
-  Offset? foodPosition;
+  final SnakeGameEngine _engine = SnakeGameEngine();
+  SnakeGameState? _state;
+  ControlMode _controlMode = ControlMode.buttons;
 
-  double? screenWidth;
-  double? screenHeight;
-  late int lowerBoundX, upperBoundX, lowerBoundY, upperBoundY;
-
-  Timer? timer;
-  double speed = 1;
-
-  int score = 0;
-
-  void draw() async {
-    // Step 1
-    if (positions.length == 0) {
-      positions.add(getRandomPositionWithinRange());
-    }
-    // Step 2
-    while (length > positions.length) {
-      positions.add(positions[positions.length - 1]);
-    }
-    // Step 3
-    for (var i = positions.length - 1; i > 0; i--) {
-      positions[i] = positions[i - 1];
-    }
-
-    positions[0] = await getNextPosition(positions[0]);
-  }
-
-  Direction getRandomDirection([DirectionType? type]) {
-    
-    if (type == DirectionType.horizontal) {
-      bool random = Random().nextBool();
-      if (random) {
-        return Direction.right;
-      } else {
-        return Direction.left;
-      }
-    } else if (type == DirectionType.vertical) {
-      bool random = Random().nextBool();
-      if (random) {
-        return Direction.up;
-      } else {
-        return Direction.down;
-      }
-    } else {
-      int random = Random().nextInt(4);
-      return Direction.values[random];
-    }
-  }
-
-  Offset getRandomPositionWithinRange() {
-    int posX = Random().nextInt(upperBoundX) + lowerBoundX;
-    int posY = Random().nextInt(upperBoundY) + lowerBoundY;
-    return Offset(roundToNearestTens(posX).toDouble(),
-        roundToNearestTens(posY).toDouble());
-  }
-
-  bool detectCollision(Offset position) {
-    if (position.dx >= upperBoundX && direction == Direction.right)
-      return true;
-    else if (position.dx <= lowerBoundX && direction == Direction.left)
-      return true;
-    else if (position.dy >= upperBoundY && direction == Direction.down)
-      return true;
-    else if (position.dy <= lowerBoundY && direction == Direction.up)
-      return true;
-
-    // game ends if the snake collides with itself
-    if (positions.length > 5) {
-      for (int i = 3; i < positions.length; i++) {
-        if (positions[i] == position) return true;
-      }
-    }
-    // no collision
-    return false;
-  }
-
-  void showGameOverDialog() {
-    showDialog(
-      barrierDismissible: false,
-      context: context,
-      builder: (ctx) {
-        return AlertDialog(
-          backgroundColor: Colors.red,
-          shape: RoundedRectangleBorder(
-              side: BorderSide(
-                color: Colors.black,
-                width: 3.0,
-              ),
-              borderRadius: BorderRadius.all(Radius.circular(10.0))),
-          title: Text(
-            "Game Over",
-            style: TextStyle(color: Colors.white),
-          ),
-          content: Text(
-            "Your game is over but you played well. Your score is " +
-                score.toString() +
-                ".",
-            style: TextStyle(color: Colors.white),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                restart();
-              },
-              child: Text(
-                "Restart",
-                style:
-                    TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Future<Offset> getNextPosition(Offset position) async {
-    Offset nextPosition = position; // Initialize with a default value
-    if (direction == Direction.right) {
-      if (_previousDirection == Direction.left) {
-        nextPosition = Offset(position.dx - step, position.dy);
-      } else {
-        _previousDirection = direction;
-        nextPosition = Offset(position.dx + step, position.dy);
-      }
-    } else if (direction == Direction.left) {
-      if (_previousDirection == Direction.right)
-        nextPosition = Offset(position.dx + step, position.dy);
-      else {
-        _previousDirection = direction;
-        nextPosition = Offset(position.dx - step, position.dy);
-      }
-    } else if (direction == Direction.up) {
-      if (_previousDirection == Direction.down) {
-        nextPosition = Offset(position.dx, position.dy + step);
-      } else {
-        _previousDirection = direction;
-        nextPosition = Offset(position.dx, position.dy - step);
-      }
-    } else if (direction == Direction.down) {
-      if (_previousDirection == Direction.up) {
-        nextPosition = Offset(position.dx, position.dy - step);
-      } else {
-        _previousDirection = direction;
-        nextPosition = Offset(position.dx, position.dy + step);
-      }
-    }
-
-    if (detectCollision(position)) {
-      if (timer != null && timer!.isActive) timer!.cancel();
-      await Future.delayed(
-          Duration(milliseconds: 500), () => showGameOverDialog());
-      return position;
-    }
-
-    return nextPosition;
-  }
-
-  void drawFood() {
-    // Step 1
-    if (foodPosition == null) {
-      foodPosition = getRandomPositionWithinRange();
-    }
-
-    if (foodPosition == positions[0]) {
-      length++;
-      speed += 0.05;
-      score += 5;
-      changeSpeed();
-
-      foodPosition = getRandomPositionWithinRange();
-    }
-
-    // Step 2
-    food = Piece(
-      posX: foodPosition!.dx.toInt(),
-      posY: foodPosition!.dy.toInt(),
-      size: step,
-      color: Color(0XFF8EA604),
-      isAnimated: true,
-    );
-  }
-
-  List<Piece> getPieces() {
-    final pieces = <Piece>[];
-    draw();
-    drawFood();
-
-    // 1
-    for (var i = 0; i < length; ++i) {
-      // 2
-      if (i >= positions.length) {
-        continue;
-      }
-
-      // 3
-      pieces.add(
-        Piece(
-          posX: positions[i].dx.toInt(),
-          posY: positions[i].dy.toInt(),
-          // 4
-          size: step,
-          color: Colors.red,
-        ),
-      );
-    }
-
-    return pieces;
-  }
-
-  Widget getControls() {
-    return ControlPanel(
-      onTapped: (Direction newDirection) {
-        direction = newDirection;
-      },
-    );
-  }
-
-  int roundToNearestTens(int num) {
-    int divisor = step;
-    int output = (num ~/ divisor) * divisor;
-    if (output == 0) {
-      output += step;
-    }
-    return output;
-  }
-
-  void changeSpeed() {
-    if (timer != null && timer!.isActive) timer!.cancel();
-
-    timer = Timer.periodic(Duration(milliseconds: 250 ~/ speed), (timer) {
-      setState(() {});
-    });
-  }
-
-  Widget getScore() {
-    return Text(
-      "Score: " + score.toString(),
-      style: TextStyle(fontSize: 24.0),
-    );
-  }
-
-  void restart() {
-    score = 0;
-    length = 5;
-    positions.clear();
-    direction = getRandomDirection();
-    speed = 1;
-    changeSpeed();
-  }
-
-  Widget getPlayAreaBorder() {
-    return Positioned(
-      top: lowerBoundY.toDouble(),
-      left: lowerBoundX.toDouble(),
-      child: Container(
-        width: (upperBoundX - lowerBoundX + step).toDouble(),
-        height: (upperBoundY - lowerBoundY + step).toDouble(),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: Colors.black.withOpacity(0.2),
-            style: BorderStyle.solid,
-            width: 1.0,
-          ),
-        ),
-      ),
-    );
-  }
+  Direction? _queuedDirection;
+  late int _rows;
+  late int _cols;
 
   @override
   void initState() {
     super.initState();
-    _previousDirection = direction;
-    restart();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initGame();
+    });
+  }
+
+  void _initGame() {
+    final size = MediaQuery.of(context).size;
+    _cols = (size.width ~/ _cellSize);
+    _rows = ((size.height * 0.5) ~/ _cellSize);
+
+    setState(() {
+      _state = _engine.createInitial(
+        rows: _rows,
+        cols: _cols,
+        cellSize: _cellSize,
+      );
+    });
+
+    _startTicker();
+  }
+
+  void _startTicker() {
+    Future.doWhile(() async {
+      if (!mounted || _state == null || _state!.isGameOver) {
+        return false;
+      }
+      await Future.delayed(
+        Duration(milliseconds: (250 ~/ _state!.speed)),
+      );
+      if (!mounted) return false;
+      setState(() {
+        _state = _engine.step(_state!, _queuedDirection);
+        _queuedDirection = null;
+      });
+      return true;
+    });
+  }
+
+  void _onDirectionChanged(Direction direction) {
+    setState(() {
+      _queuedDirection = direction;
+    });
+  }
+
+  void _onSwipe(DragEndDetails details) {
+    if (details.velocity.pixelsPerSecond.dx.abs() >
+        details.velocity.pixelsPerSecond.dy.abs()) {
+      if (details.velocity.pixelsPerSecond.dx > 0) {
+        _onDirectionChanged(Direction.right);
+      } else {
+        _onDirectionChanged(Direction.left);
+      }
+    } else {
+      if (details.velocity.pixelsPerSecond.dy > 0) {
+        _onDirectionChanged(Direction.down);
+      } else {
+        _onDirectionChanged(Direction.up);
+      }
+    }
+  }
+
+  Widget _buildScore() {
+    final score = _state?.score ?? 0;
+    return Text(
+      'Score: $score',
+      style: const TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  void _restart() {
+    setState(() {
+      _state = _engine.createInitial(
+        rows: _rows,
+        cols: _cols,
+        cellSize: _cellSize,
+      );
+      _queuedDirection = null;
+    });
+    _startTicker();
   }
 
   @override
   Widget build(BuildContext context) {
-    screenWidth = MediaQuery.of(context).size.width;
-    screenHeight = MediaQuery.of(context).size.height;
-
-    lowerBoundX = step;
-    lowerBoundY = step;
-    upperBoundX = roundToNearestTens(screenWidth!.toInt() - step);
-    upperBoundY = roundToNearestTens(screenWidth!.toInt() - step);
+    if (_state == null) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
 
     return Scaffold(
+      backgroundColor: const Color(0xFF020412),
       appBar: AppBar(
-        title: getScore(),
+        backgroundColor: Colors.black,
+        elevation: 0,
+        title: _buildScore(),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _restart,
+          ),
+        ],
       ),
-      body: Container(
-        child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                child: Stack(
-                  children: [
-                    getPlayAreaBorder(),
-                    Stack(
-                      children: getPieces(),
-                    ),
-                    if (food != null) food!,
-                  ],
+      body: Column(
+        children: [
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ChoiceChip(
+                  label: const Text('Buttons'),
+                  selected: _controlMode == ControlMode.buttons,
+                  onSelected: (_) {
+                    setState(() {
+                      _controlMode = ControlMode.buttons;
+                    });
+                  },
                 ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('Swipe'),
+                  selected: _controlMode == ControlMode.swipe,
+                  onSelected: (_) {
+                    setState(() {
+                      _controlMode = ControlMode.swipe;
+                    });
+                  },
+                ),
+                const SizedBox(width: 8),
+                ChoiceChip(
+                  label: const Text('Gyro'),
+                  selected: _controlMode == ControlMode.gyro,
+                  onSelected: (_) {
+                    setState(() {
+                      _controlMode = ControlMode.gyro;
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: GestureDetector(
+              onHorizontalDragEnd:
+                  _controlMode == ControlMode.swipe ? _onSwipe : null,
+              onVerticalDragEnd:
+                  _controlMode == ControlMode.swipe ? _onSwipe : null,
+              child: GameBoard(
+                state: _state!,
+                cellSize: _cellSize,
               ),
             ),
-            getControls(),
-          ],
-        ),
+          ),
+          const Spacer(),
+          if (_controlMode == ControlMode.buttons)
+            ControlPanel(
+              onTapped: _onDirectionChanged,
+            ),
+          const SizedBox(height: 24),
+        ],
       ),
     );
   }

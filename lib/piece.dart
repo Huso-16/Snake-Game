@@ -53,21 +53,41 @@ class _PieceState extends State<Piece> with SingleTickerProviderStateMixin {
     return Positioned(
       left: widget.posX.toDouble(),
       top: widget.posY.toDouble(),
-      child: Opacity(
-        opacity: widget.isAnimated ? _animationController?.value ?? 1.0 : 1.0,
-        child: Container(
-          width: widget.size.toDouble(),
-          height: widget.size.toDouble(),
-          decoration: BoxDecoration(
-            color: widget.color,
-            borderRadius: BorderRadius.all(
-              Radius.circular(
-                widget.size.toDouble(),
+      child: AnimatedBuilder(
+        animation: _animationController!,
+        builder: (context, child) {
+          final scale =
+              widget.isAnimated ? (_animationController?.value ?? 1.0) : 1.0;
+          return Opacity(
+            opacity: widget.isAnimated ? 0.7 + 0.3 * scale : 1.0,
+            child: Transform.scale(
+              scale: scale,
+              child: Container(
+                width: widget.size.toDouble(),
+                height: widget.size.toDouble(),
+                decoration: BoxDecoration(
+                  shape: BoxShape.rectangle,
+                  borderRadius: BorderRadius.circular(widget.size.toDouble()),
+                  gradient: LinearGradient(
+                    colors: [
+                      widget.color.withOpacity(0.9),
+                      Colors.white.withOpacity(0.1),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.color.withOpacity(0.7),
+                      blurRadius: 12,
+                      spreadRadius: 1,
+                    ),
+                  ],
+                ),
               ),
             ),
-            border: Border.all(color: Colors.black, width: 2.0),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

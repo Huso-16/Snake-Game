@@ -13,61 +13,35 @@ class ControlPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        Expanded(
-          child: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ControlButton(
+            icon: const Icon(Icons.arrow_left),
+            onPressed: () => onTapped(Direction.left),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Container(),
-              ),
               ControlButton(
-                icon: Icon(Icons.arrow_left),
-                onPressed: () {
-                  onTapped(Direction.left);
-                },
+                icon: const Icon(Icons.arrow_drop_up_sharp),
+                onPressed: () => onTapped(Direction.up),
+              ),
+              const SizedBox(height: 16.0),
+              ControlButton(
+                icon: const Icon(Icons.arrow_drop_down_sharp),
+                onPressed: () => onTapped(Direction.down),
               ),
             ],
           ),
-        ),
-        Expanded(
-          child: Column(
-            children: [
-              ControlButton(
-                icon: Icon(Icons.arrow_drop_up_sharp),
-                onPressed: () {
-                  onTapped(Direction.up);
-                },
-              ),
-              SizedBox(
-                height: 75.0,
-              ),
-              ControlButton(
-                icon: Icon(Icons.arrow_drop_down_sharp),
-                onPressed: () {
-                  onTapped(Direction.down);
-                },
-              ),
-            ],
+          ControlButton(
+            icon: const Icon(Icons.arrow_right),
+            onPressed: () => onTapped(Direction.right),
           ),
-        ),
-        Expanded(
-          child: Row(
-            children: [
-              ControlButton(
-                icon: Icon(Icons.arrow_right),
-                onPressed: () {
-                  onTapped(Direction.right);
-                },
-              ),
-              Expanded(
-                child: Container(),
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
