@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:sensors_plus/sensors_plus.dart';
 
 import 'control_panel.dart';
 import 'control_mode.dart';
@@ -25,10 +24,6 @@ class _GamePageState extends State<GamePage> {
   late int _rows;
   late int _cols;
   
-  StreamSubscription<AccelerometerEvent>? _accelerometerSubscription;
-  DateTime? _lastGyroUpdate;
-  static const _gyroUpdateInterval = Duration(milliseconds: 200); // Debounce interval
-  static const _tiltThreshold = 2.0; // Minimum tilt to trigger direction change
   Timer? _gameTimer;
 
   @override
@@ -42,7 +37,6 @@ class _GamePageState extends State<GamePage> {
   @override
   void dispose() {
     _gameTimer?.cancel();
-    _accelerometerSubscription?.cancel();
     super.dispose();
   }
 
@@ -60,7 +54,6 @@ class _GamePageState extends State<GamePage> {
     });
 
     _startTicker();
-    _setupGyroControls();
   }
 
   void _startTicker() {
@@ -96,50 +89,6 @@ class _GamePageState extends State<GamePage> {
     setState(() {
       _queuedDirection = direction;
     });
-  }
-
-  void _setupGyroControls() {
-    _accelerometerSubscription?.cancel();
-    
-    if (_controlMode == ControlMode.gyro) {
-      _accelerometerSubscription = accelerometerEventStream().listen(
-        (AccelerometerEvent event) {
-          final now = DateTime.now();
-          if (_lastGyroUpdate != null &&
-              now.difference(_lastGyroUpdate!) < _gyroUpdateInterval) {
-            return; // Debounce
-          }
-          
-          final x = event.x;
-          final y = event.y;
-          final absX = x.abs();
-          final absY = y.abs();
-          
-          // Determine dominant axis
-          if (absX > absY && absX > _tiltThreshold) {
-            // Horizontal tilt
-            _lastGyroUpdate = now;
-            if (x > 0) {
-              _onDirectionChanged(Direction.right);
-            } else {
-              _onDirectionChanged(Direction.left);
-            }
-          } else if (absY > absX && absY > _tiltThreshold) {
-            // Vertical tilt
-            _lastGyroUpdate = now;
-            if (y > 0) {
-              _onDirectionChanged(Direction.down);
-            } else {
-              _onDirectionChanged(Direction.up);
-            }
-          }
-        },
-        onError: (error) {
-          // Handle sensor errors gracefully
-          print('Gyro sensor error: $error');
-        },
-      );
-    }
   }
 
   void _onSwipe(DragEndDetails details) {
@@ -277,7 +226,6 @@ class _GamePageState extends State<GamePage> {
                   onSelected: (_) {
                     setState(() {
                       _controlMode = ControlMode.buttons;
-                      _setupGyroControls();
                     });
                   },
                 ),
@@ -288,18 +236,6 @@ class _GamePageState extends State<GamePage> {
                   onSelected: (_) {
                     setState(() {
                       _controlMode = ControlMode.swipe;
-                      _setupGyroControls();
-                    });
-                  },
-                ),
-                const SizedBox(width: 8),
-                ChoiceChip(
-                  label: const Text('Gyro'),
-                  selected: _controlMode == ControlMode.gyro,
-                  onSelected: (_) {
-                    setState(() {
-                      _controlMode = ControlMode.gyro;
-                      _setupGyroControls();
                     });
                   },
                 ),
