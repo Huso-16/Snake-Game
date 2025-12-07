@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'piece.dart';
 import 'snake_game.dart';
+import 'snake_head.dart';
 
 class GameBoard extends StatelessWidget {
   final SnakeGameState state;
@@ -64,19 +65,38 @@ class GameBoard extends StatelessWidget {
   }
 
   List<Widget> _buildSnake() {
-    return state.snake.asMap().entries.map((entry) {
-      final index = entry.key;
-      final pos = entry.value;
-      final isHead = index == 0;
-
-      return Piece(
-        posX: (pos.dx.toInt() * cellSize),
-        posY: (pos.dy.toInt() * cellSize),
-        size: cellSize,
-        color: isHead ? const Color(0xFF00F5FF) : const Color(0xFF00FFA3),
-        isAnimated: false,
-      );
-    }).toList();
+    final widgets = <Widget>[];
+    
+    for (int i = 0; i < state.snake.length; i++) {
+      final pos = state.snake[i];
+      final isHead = i == 0;
+      
+      if (isHead) {
+        widgets.add(
+          SnakeHead(
+            posX: (pos.dx.toInt() * cellSize),
+            posY: (pos.dy.toInt() * cellSize),
+            size: cellSize,
+            direction: state.direction,
+          ),
+        );
+      } else {
+        // Body segments with green color and yellow belly
+        final bodyColor = i % 2 == 0 
+            ? const Color(0xFF4CAF50) // Green
+            : const Color(0xFF66BB6A); // Lighter green
+        widgets.add(
+          _SnakeBodySegment(
+            posX: (pos.dx.toInt() * cellSize),
+            posY: (pos.dy.toInt() * cellSize),
+            size: cellSize,
+            color: bodyColor,
+          ),
+        );
+      }
+    }
+    
+    return widgets;
   }
 
   Widget _buildFood() {
@@ -117,6 +137,72 @@ class _GridPainter extends CustomPainter {
       final dx = j * cellSize;
       canvas.drawLine(Offset(dx, 0), Offset(dx, size.height), paint);
     }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _SnakeBodySegment extends StatelessWidget {
+  final int posX;
+  final int posY;
+  final int size;
+  final Color color;
+
+  const _SnakeBodySegment({
+    Key? key,
+    required this.posX,
+    required this.posY,
+    required this.size,
+    required this.color,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: posX.toDouble(),
+      top: posY.toDouble(),
+      child: Container(
+        width: size.toDouble(),
+        height: size.toDouble(),
+        decoration: BoxDecoration(
+          shape: BoxShape.rectangle,
+          borderRadius: BorderRadius.circular(size.toDouble() * 0.2),
+          gradient: LinearGradient(
+            colors: [
+              color,
+              const Color(0xFFFFB74D).withOpacity(0.3), // Yellow belly hint
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.4),
+              blurRadius: 8,
+              spreadRadius: 0.5,
+            ),
+          ],
+        ),
+        // Add subtle spots pattern
+        child: CustomPaint(
+          painter: _SpotPainter(),
+        ),
+      ),
+    );
+  }
+}
+
+class _SpotPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF81C784).withOpacity(0.3)
+      ..style = PaintingStyle.fill;
+
+    // Draw a few small spots
+    canvas.drawCircle(Offset(size.width * 0.3, size.height * 0.3), size.width * 0.15, paint);
+    canvas.drawCircle(Offset(size.width * 0.7, size.height * 0.7), size.width * 0.12, paint);
   }
 
   @override
