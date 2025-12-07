@@ -29,6 +29,7 @@ class _GamePageState extends State<GamePage> {
   DateTime? _lastGyroUpdate;
   static const _gyroUpdateInterval = Duration(milliseconds: 200); // Debounce interval
   static const _tiltThreshold = 2.0; // Minimum tilt to trigger direction change
+  Timer? _gameTimer;
 
   @override
   void initState() {
@@ -40,6 +41,7 @@ class _GamePageState extends State<GamePage> {
 
   @override
   void dispose() {
+    _gameTimer?.cancel();
     _accelerometerSubscription?.cancel();
     super.dispose();
   }
@@ -62,20 +64,32 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _startTicker() {
-    Future.doWhile(() async {
+    _gameTimer?.cancel(); // Cancel any existing timer
+    
+    void tick() {
       if (!mounted || _state == null || _state!.isGameOver) {
-        return false;
+        _gameTimer?.cancel();
+        return;
       }
-      await Future.delayed(
-        Duration(milliseconds: (250 ~/ _state!.speed)),
-      );
-      if (!mounted) return false;
+      
       setState(() {
         _state = _engine.step(_state!, _queuedDirection);
         _queuedDirection = null;
       });
-      return true;
-    });
+      
+      if (mounted && _state != null && !_state!.isGameOver) {
+        _gameTimer = Timer(
+          Duration(milliseconds: (250 ~/ _state!.speed).clamp(50, 500)),
+          tick,
+        );
+      }
+    }
+    
+    // Start the first tick
+    _gameTimer = Timer(
+      Duration(milliseconds: (250 ~/ (_state?.speed ?? 1.0)).clamp(50, 500)),
+      tick,
+    );
   }
 
   void _onDirectionChanged(Direction direction) {
@@ -206,6 +220,7 @@ class _GamePageState extends State<GamePage> {
   }
 
   void _restart() {
+    _gameTimer?.cancel(); // Stop the current timer
     setState(() {
       _state = _engine.createInitial(
         rows: _rows,
@@ -214,7 +229,7 @@ class _GamePageState extends State<GamePage> {
       );
       _queuedDirection = null;
     });
-    _startTicker();
+    _startTicker(); // Start fresh timer with speed = 1
   }
 
   @override
