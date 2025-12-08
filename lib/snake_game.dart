@@ -81,6 +81,11 @@ class SnakeGameEngine {
 
   SnakeGameState step(SnakeGameState state, Direction? nextDirection) {
     if (state.isGameOver) return state;
+    
+    // Safety check: ensure valid grid dimensions
+    if (state.rows <= 0 || state.cols <= 0) {
+      return state.copyWith(isGameOver: true);
+    }
 
     final Direction effectiveDirection =
         _validateDirectionChange(state.direction, nextDirection);
@@ -135,6 +140,11 @@ class SnakeGameEngine {
 
   Offset _nextHead(
       Offset head, Direction direction, int rows, int cols) {
+    // Safety check: ensure valid dimensions
+    if (rows <= 0 || cols <= 0) {
+      return head; // Return current position if grid is invalid
+    }
+
     int x = head.dx.toInt();
     int y = head.dy.toInt();
 
@@ -163,14 +173,38 @@ class SnakeGameEngine {
     required int cols,
     required List<Offset> snake,
   }) {
-    while (true) {
+    // Safety check: ensure valid grid dimensions
+    if (rows <= 0 || cols <= 0) {
+      // Return a default position if grid is invalid
+      return const Offset(0, 0);
+    }
+
+    // Limit iterations to prevent infinite loops
+    int attempts = 0;
+    const maxAttempts = 1000;
+    
+    while (attempts < maxAttempts) {
       final x = _random.nextInt(cols);
       final y = _random.nextInt(rows);
       final candidate = Offset(x.toDouble(), y.toDouble());
       if (!snake.contains(candidate)) {
         return candidate;
       }
+      attempts++;
     }
+    
+    // Fallback: return first available position if random generation fails
+    for (int y = 0; y < rows; y++) {
+      for (int x = 0; x < cols; x++) {
+        final candidate = Offset(x.toDouble(), y.toDouble());
+        if (!snake.contains(candidate)) {
+          return candidate;
+        }
+      }
+    }
+    
+    // Last resort: return a position that might overlap (shouldn't happen)
+    return Offset((cols ~/ 2).toDouble(), (rows ~/ 2).toDouble());
   }
 }
 

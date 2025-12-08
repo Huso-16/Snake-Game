@@ -1,16 +1,20 @@
 import 'package:flutter/material.dart';
 
 class ControlButton extends StatelessWidget {
-  final Function onPressed;
+  final VoidCallback onPressed;
   final Icon icon;
 
-  const ControlButton({Key? key, required this.onPressed, required this.icon}) : super(key: key);
+  const ControlButton({
+    Key? key,
+    required this.onPressed,
+    required this.icon,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 64.0,
-      height: 64.0,
+      width: 70.0,
+      height: 70.0,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: const LinearGradient(
@@ -23,9 +27,9 @@ class ControlButton extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.cyan.withOpacity(0.6),
-            blurRadius: 12,
-            spreadRadius: 1,
+            color: const Color(0xFF00F5FF).withOpacity(0.6),
+            blurRadius: 15,
+            spreadRadius: 2,
           ),
         ],
       ),
@@ -33,12 +37,13 @@ class ControlButton extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           customBorder: const CircleBorder(),
-          onTap: () => onPressed(),
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(35),
           child: Center(
             child: Icon(
               icon.icon,
-              color: Colors.black,
-              size: 28,
+              color: Colors.white,
+              size: 32,
             ),
           ),
         ),

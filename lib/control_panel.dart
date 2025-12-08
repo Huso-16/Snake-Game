@@ -13,31 +13,40 @@ class ControlPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32.0),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Left button
           ControlButton(
-            icon: const Icon(Icons.arrow_left),
+            icon: const Icon(Icons.arrow_back_ios_rounded),
             onPressed: () => onTapped(Direction.left),
           ),
+          
+          const SizedBox(width: 20),
+          
+          // Center column (up/down)
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ControlButton(
-                icon: const Icon(Icons.arrow_drop_up_sharp),
+                icon: const Icon(Icons.arrow_drop_up_rounded),
                 onPressed: () => onTapped(Direction.up),
               ),
-              const SizedBox(height: 16.0),
+              const SizedBox(height: 20.0),
               ControlButton(
-                icon: const Icon(Icons.arrow_drop_down_sharp),
+                icon: const Icon(Icons.arrow_drop_down_rounded),
                 onPressed: () => onTapped(Direction.down),
               ),
             ],
           ),
+          
+          const SizedBox(width: 20),
+          
+          // Right button
           ControlButton(
-            icon: const Icon(Icons.arrow_right),
+            icon: const Icon(Icons.arrow_forward_ios_rounded),
             onPressed: () => onTapped(Direction.right),
           ),
         ],
